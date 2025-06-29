@@ -1,4 +1,4 @@
-# SharePaste 📋
+# Secure Copy & Paste 📋
 
 Eine moderne und sichere Copy & Paste Webseite mit Code-Generierung für die einfache Freigabe von Text und Code.
 
