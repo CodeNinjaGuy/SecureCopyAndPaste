@@ -411,7 +411,19 @@ app.post('/api/upload-multiple', upload.array('files', 10), (req, res) => {
 });
 
 // Statische Bereitstellung der Uploads
-app.use('/uploads', express.static(uploadPath));
+app.use('/uploads', express.static(uploadPath, {
+    setHeaders: (res, path) => {
+        // CORS-Header für Bilder setzen
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+        
+        // Cache-Header für Bilder
+        if (path.match(/\.(jpg|jpeg|png|gif|webp|bmp|svg|ico)$/i)) {
+            res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 Stunde Cache
+        }
+    }
+}));
 
 // QR-Code Generierung API
 app.get('/api/qr', async (req, res) => {

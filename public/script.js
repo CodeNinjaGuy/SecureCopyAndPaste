@@ -311,8 +311,16 @@ function displayRetrievedContent(data) {
         }
         
         const filesList = data.files.map((file, index) => {
-            // Prüfe, ob es ein Bild ist
-            const isImage = /^image\//.test(file.mimetype);
+            // Verbesserte Bilderkennung
+            const isImage = isImageFile(file);
+            
+            console.log('Verarbeite Datei:', {
+                filename: file.filename,
+                originalname: file.originalname,
+                mimetype: file.mimetype,
+                downloadUrl: file.downloadUrl,
+                isImage: isImage
+            });
             
             return `
                 <div class="file-item">
@@ -326,7 +334,15 @@ function displayRetrievedContent(data) {
                     </div>
                     ${isImage ? `
                         <div class="file-preview">
-                            <img src="${file.downloadUrl}" alt="${file.originalname}" class="file-thumbnail" loading="lazy">
+                            <img src="${file.downloadUrl}" 
+                                 alt="${file.originalname}" 
+                                 class="file-thumbnail" 
+                                 loading="lazy"
+                                 onerror="console.error('Bildfehler:', '${file.downloadUrl}'); this.style.display='none'; this.nextElementSibling.style.display='block';"
+                                 onload="console.log('Bild geladen:', '${file.downloadUrl}'); this.nextElementSibling.style.display='none';">
+                            <div class="image-loading-error" style="display: none; color: #ef4444; font-size: 0.875rem; margin-top: 0.5rem;">
+                                ⚠️ Bildvorschau nicht verfügbar (${file.mimetype})
+                            </div>
                         </div>
                     ` : ''}
                     <div class="file-actions">
@@ -369,6 +385,33 @@ function displayRetrievedContent(data) {
     }
     
     retrieveResult.style.display = 'block';
+}
+
+// Hilfsfunktion zur verbesserten Bilderkennung
+function isImageFile(file) {
+    // Prüfe MIME-Type
+    if (file.mimetype && file.mimetype.startsWith('image/')) {
+        return true;
+    }
+    
+    // Fallback: Prüfe Dateiendung
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg', '.ico', '.tiff', '.tif', '.heic', '.heif'];
+    const fileName = file.originalname || file.filename || '';
+    const extension = fileName.toLowerCase().substring(fileName.lastIndexOf('.'));
+    
+    return imageExtensions.includes(extension);
+}
+
+// Hilfsfunktion zur Bildvalidierung
+function validateImageUrl(url) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
+        img.src = url;
+        // Timeout nach 5 Sekunden
+        setTimeout(() => resolve(false), 5000);
+    });
 }
 
 // Download File Function (muss global verfügbar sein)
