@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure C(opy) A(nd) P(aste)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <header class="header apple-style">
+            <div class="logo">
+                <img src="logo.png" alt="Logo" class="logo-img" />
+                <h1>
+                    Secure<br>
+                    <span class="brand-blue">C</span>opy <span class="brand-blue">A</span>nd <span class="brand-blue">P</span>aste
+                </h1>
+            </div>
+            <p class="tagline">Sichere und einfache Text- & Datei-Freigabe</p>
+            <div class="validity-hint">
+                <span class="validity-icon">⏳</span>
+                <span class="validity-text">
+                    <strong>Hinweis:</strong> Die Gültigkeit jedes Codes kannst du beim Erstellen selbst bestimmen (1, 5, 10 oder 60 Minuten).<br>
+                    Nach Ablauf werden alle Inhalte und Dateien automatisch und unwiderruflich gelöscht.
+                </span>
+            </div>
+        </header>
+
+        <main class="main">
+            <div class="server-stats" id="server-stats">
+                <div class="stats-label">Server-Kapazität:</div>
+                <div class="stats-bar-outer">
+                    <div class="stats-bar-inner" id="stats-bar-inner"></div>
+                </div>
+                <div class="stats-numbers">
+                    <span id="stats-free"></span> frei &bull; <span id="stats-used"></span> belegt &bull; <span id="stats-max"></span> gesamt
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="share">Teilen</button>
+                <button class="tab-btn" data-tab="upload">Upload</button>
+                <button class="tab-btn" data-tab="retrieve">Abrufen</button>
+            </div>
+
+            <!-- Share Tab -->
+            <div class="tab-content active" id="share-tab">
+                <div class="share-container">
+                    <div class="input-group">
+                        <label for="content-input">Inhalt eingeben:</label>
+                        <div class="editor-container">
+                            <div class="editor-toolbar">
+                                <button type="button" class="toolbar-btn" data-action="bold" title="Fett">B</button>
+                                <button type="button" class="toolbar-btn" data-action="italic" title="Kursiv">I</button>
+                                <button type="button" class="toolbar-btn" data-action="underline" title="Unterstrichen">U</button>
+                                <button type="button" class="toolbar-btn" data-action="code" title="Code">&lt;/&gt;</button>
+                                <button type="button" class="toolbar-btn" data-action="clear" title="Formatierung löschen">🗑️</button>
+                            </div>
+                            <div class="editor-wrapper">
+                                <div id="content-editor" class="content-editor" contenteditable="true" placeholder="Fügen Sie hier Ihren Text oder Code ein..."></div>
+                                <textarea id="content-input" class="content-textarea" placeholder="Fügen Sie hier Ihren Text oder Code ein..." style="display: none;"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="expiry-select">Gültigkeit wählen:</label>
+                        <select id="expiry-select" class="form-select">
+                            <option value="1">1 Minute</option>
+                            <option value="5" selected>5 Minuten</option>
+                            <option value="10">10 Minuten</option>
+                            <option value="60">60 Minuten</option>
+                        </select>
+                    </div>
+
+                    <div class="button-group">
+                        <button id="share-btn" class="btn btn-primary">
+                            <span class="btn-icon">📤</span>
+                            Teilen
+                        </button>
+                        <button id="clear-btn" class="btn btn-secondary">
+                            <span class="btn-icon">🗑️</span>
+                            Löschen
+                        </button>
+                    </div>
+
+                    <div id="share-result" class="result-container" style="display: none;">
+                        <div class="success-message">
+                            <span class="success-icon">✅</span>
+                            <div class="success-content">
+                                <h3>Erfolgreich geteilt!</h3>
+                                <p>Ihr Code: <span id="generated-code" class="generated-code"></span></p>
+                                <p><strong>Direktlink:</strong> <span id="generated-link"></span></p>
+                                
+                                <!-- QR Code Section -->
+                                <div class="qr-code-section">
+                                    <h4>QR-Code für einfachen Zugriff:</h4>
+                                    <div class="qr-code-container">
+                                        <img id="qr-code-img" src="" alt="QR-Code" style="max-width:200px;max-height:200px; margin-top: 1rem; display: block;" />
+                                    </div>
+                                    <p class="qr-code-hint">📱 Scannen Sie den QR-Code mit Ihrem Smartphone</p>
+                                </div>
+                                
+                                <div class="button-group">
+                                    <button id="copy-code-btn" class="btn btn-secondary">
+                                        <i class="fas fa-copy"></i> Code kopieren
+                                    </button>
+                                    <button id="copy-link-btn" class="btn btn-secondary">
+                                        <i class="fas fa-link"></i> Link kopieren
+                                    </button>
+                                    <button id="download-qr-btn" class="btn btn-secondary">
+                                        <span class="btn-icon">📱</span> QR-Code herunterladen
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload Tab -->
+            <div class="tab-content" id="upload-tab">
+                <div class="upload-container">
+                    <div class="upload-zone" id="upload-zone">
+                        <div class="upload-icon">📁</div>
+                        <h3>Dateien auswählen</h3>
+                        <p>Ziehen Sie Dateien hierher oder klicken Sie zum Auswählen</p>
+                        <p class="upload-info">
+                            <strong>Unterstützte Formate:</strong> Bilder (JPG, PNG, GIF, WEBP), PDF, DOCX, XLSX, TXT<br>
+                            <strong>Max. Größe:</strong> 100 MB pro Datei
+                        </p>
+                        <input type="file" id="file-input" 
+                               accept="image/*,.pdf,.docx,.xlsx,.txt" 
+                               multiple 
+                               style="display: none;">
+                        <button id="select-file-btn" class="btn btn-primary">
+                            <span class="btn-icon">📁</span>
+                            Dateien auswählen
+                        </button>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="upload-expiry-select">Gültigkeit wählen:</label>
+                        <select id="upload-expiry-select" class="form-select">
+                            <option value="1">1 Minute</option>
+                            <option value="5" selected>5 Minuten</option>
+                            <option value="10">10 Minuten</option>
+                            <option value="60">60 Minuten</option>
+                        </select>
+                    </div>
+
+                    <div id="selected-files" class="selected-files" style="display: none;">
+                        <h3>Ausgewählte Dateien:</h3>
+                        <div id="files-list" class="files-list"></div>
+                        <div class="button-group">
+                            <button id="upload-share-btn" class="btn btn-primary">
+                                <span class="btn-icon">📤</span>
+                                Dateien teilen
+                            </button>
+                            <button id="clear-files-btn" class="btn btn-secondary">
+                                <span class="btn-icon">🗑️</span>
+                                Alle löschen
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="upload-progress" class="upload-progress" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-fill"></div>
+                        </div>
+                        <p id="upload-status">Wird hochgeladen...</p>
+                    </div>
+
+                    <div id="upload-result" class="result-container" style="display: none;">
+                        <div class="success-message">
+                            <span class="success-icon">✅</span>
+                            <div class="success-content">
+                                <h3>Dateien erfolgreich geteilt!</h3>
+                                <p><strong>Code:</strong> <span id="uploaded-code"></span></p>
+                                <div class="file-info">
+                                    <p><strong>Anzahl Dateien:</strong> <span id="uploaded-count"></span></p>
+                                    <p><strong>Direktlink:</strong> <span id="uploaded-link"></span></p>
+                                </div>
+                                
+                                <!-- QR Code Section for Upload -->
+                                <div class="qr-code-section">
+                                    <h4>QR-Code für einfachen Zugriff:</h4>
+                                    <div class="qr-code-container">
+                                        <img id="upload-qr-code-img" src="" alt="QR-Code" style="max-width:200px;max-height:200px; margin-top: 1rem; display: block;" />
+                                    </div>
+                                    <p class="qr-code-hint">📱 Scannen Sie den QR-Code mit Ihrem Smartphone</p>
+                                </div>
+                                
+                                <div class="button-group">
+                                    <button id="copy-upload-code-btn" class="btn btn-outline">
+                                        <span class="btn-icon">📋</span>
+                                        Code kopieren
+                                    </button>
+                                    <button id="copy-upload-link-btn" class="btn btn-outline">
+                                        <span class="btn-icon">🔗</span>
+                                        Link kopieren
+                                    </button>
+                                    <button id="download-upload-qr-btn" class="btn btn-outline">
+                                        <span class="btn-icon">📱</span>
+                                        QR-Code herunterladen
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Retrieve Tab -->
+            <div class="tab-content" id="retrieve-tab">
+                <div class="retrieve-container">
+                    <div class="input-group">
+                        <label for="code-input">4-stelligen Code eingeben:</label>
+                        <div class="code-input-wrapper">
+                            <input type="text" id="code-input" class="form-input code-input" maxlength="4" placeholder="0000">
+                            <button id="retrieve-btn" class="btn btn-primary">
+                                <span class="btn-icon">🔍</span>
+                                Abrufen
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="retrieve-result" class="result-container" style="display: none;">
+                        <div class="content-display">
+                            <div class="content-header">
+                                <span class="content-type-badge" id="retrieved-type"></span>
+                                <span class="content-views" id="retrieved-views"></span>
+                                <span class="content-expiry" id="retrieved-expiry"></span>
+                            </div>
+                            <div class="content-body">
+                                <div id="retrieved-content"></div>
+                            </div>
+                            <div class="content-actions">
+                                <button id="copy-content-text-btn" class="btn btn-secondary">
+                                    <i class="fas fa-copy"></i> Als Text kopieren
+                                </button>
+                                <button id="copy-content-formatted-btn" class="btn btn-secondary">
+                                    <i class="fas fa-paint-brush"></i> Mit Formatierung kopieren
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="footer-content">
+                <span class="footer-text">Secure Copy and Paste</span>
+                <div class="footer-links">
+                    <button class="footer-link" id="info-btn">Info</button>
+                    <button class="footer-link" id="help-btn">Hilfe</button>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Info Modal -->
+    <div id="info-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Über Secure Copy and Paste</h2>
+                <button class="modal-close" onclick="hideInfo()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h3>Entwickelt von:</h3>
+                <div class="developer-info">
+                    <p><strong>Martin Bundschuh</strong></p>
+                    <p>Full-Stack Entwickler & Systemadministrator</p>
+                    <p>Spezialisiert auf moderne Web-Technologien und sichere Systeme</p>
+                </div>
+                
+                <h3>Features:</h3>
+                <ul>
+                    <li>✅ Sichere Text- und Code-Freigabe</li>
+                    <li>✅ Datei-Upload (Bilder, Dokumente bis 100 MB)</li>
+                    <li>✅ 4-stellige Codes für einfache Weitergabe</li>
+                    <li>✅ Unterstützung für formatierten Text und Code</li>
+                    <li>✅ Syntax-Highlighting für 20+ Programmiersprachen</li>
+                    <li>✅ Drag & Drop Upload mit Progress-Bar</li>
+                    <li>✅ Automatische Bereinigung (max. 100 Einträge)</li>
+                    <li>✅ Keine dauerhafte Speicherung</li>
+                    <li>✅ Responsive Design</li>
+                    <li>✅ HTTPS mit SSL-Zertifikaten</li>
+                </ul>
+                <h3>Unterstützte Sprachen:</h3>
+                <p>JavaScript, Python, Java, C++, C#, PHP, Ruby, Go, Rust, SQL, CSS, HTML, XML, JSON, YAML, Bash, PowerShell, Markdown und mehr!</p>
+                <h3>Verwendung:</h3>
+                <ol>
+                    <li>Text oder Code in das Eingabefeld einfügen</li>
+                    <li>Programmiersprache auswählen (für Code)</li>
+                    <li>Auf "Teilen" klicken</li>
+                    <li>Den generierten 4-stelligen Code weitergeben</li>
+                    <li>Empfänger gibt den Code ein und erhält den farbig formatierten Inhalt</li>
+                </ol>
+                <h3>Datei-Upload:</h3>
+                <ol>
+                    <li>Auf "Upload" Tab wechseln</li>
+                    <li>Datei per Drag & Drop oder Klick auswählen</li>
+                    <li>Upload-Fortschritt verfolgen</li>
+                    <li>URL kopieren oder Datei direkt öffnen</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="help-modal" class="modal" style="display: none;">
+        <div class="modal-content help-modal">
+            <div class="modal-header">
+                <h2>📚 Benutzerhandbuch & Hilfe</h2>
+                <button class="modal-close" onclick="hideHelp()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="help-section">
+                    <h3>🚀 Was ist Secure Copy and Paste?</h3>
+                    <p>Secure Copy and Paste ist eine sichere, moderne Plattform zum schnellen Teilen von Texten, Code und Dateien. Entwickelt mit Fokus auf Benutzerfreundlichkeit, Sicherheit und Effizienz.</p>
+                </div>
+
+                <div class="help-section">
+                    <h3>💪 Unsere Stärken</h3>
+                    <div class="strengths-grid">
+                        <div class="strength-item">
+                            <span class="strength-icon">🔒</span>
+                            <h4>Sicherheit</h4>
+                            <p>HTTPS-Verschlüsselung, automatisches Löschen, keine dauerhafte Speicherung</p>
+                        </div>
+                        <div class="strength-item">
+                            <span class="strength-icon">⚡</span>
+                            <h4>Geschwindigkeit</h4>
+                            <p>4-stellige Codes, sofortige Freigabe, optimierte Performance</p>
+                        </div>
+                        <div class="strength-item">
+                            <span class="strength-icon">📱</span>
+                            <h4>Mobil-optimiert</h4>
+                            <p>Perfekt für iPhone & Android, Touch-optimiert, responsive Design</p>
+                        </div>
+                        <div class="strength-item">
+                            <span class="strength-icon">🎨</span>
+                            <h4>Code-Highlighting</h4>
+                            <p>20+ Programmiersprachen, Syntax-Highlighting, formatiertes Kopieren</p>
+                        </div>
+                        <div class="strength-item">
+                            <span class="strength-icon">📁</span>
+                            <h4>Multi-File-Upload</h4>
+                            <p>Bis zu 10 Dateien gleichzeitig, 100 MB pro Datei, Bild-Vorschau</p>
+                        </div>
+                        <div class="strength-item">
+                            <span class="strength-icon">🔄</span>
+                            <h4>Flexible Gültigkeit</h4>
+                            <p>1, 5, 10 oder 60 Minuten wählbar, automatisches Löschen</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="help-section">
+                    <h3>📖 Schritt-für-Schritt Anleitung</h3>
+                    
+                    <div class="usage-step">
+                        <h4>1️⃣ Text/Code teilen</h4>
+                        <ol>
+                            <li>Wechsle zum <strong>"Teilen"</strong> Tab</li>
+                            <li>Füge deinen Text oder Code ein</li>
+                            <li>Wähle die Gültigkeitsdauer (1-60 Minuten)</li>
+                            <li>Klicke auf <strong>"Teilen"</strong></li>
+                            <li>Kopiere den 4-stelligen Code oder Direktlink</li>
+                            <li>Sende den Code an den Empfänger</li>
+                        </ol>
+                    </div>
+
+                    <div class="usage-step">
+                        <h4>2️⃣ Dateien hochladen</h4>
+                        <ol>
+                            <li>Wechsle zum <strong>"Upload"</strong> Tab</li>
+                            <li>Klicke auf <strong>"Dateien auswählen"</strong> oder ziehe Dateien per Drag & Drop</li>
+                            <li>Wähle bis zu 10 Dateien (max. 100 MB pro Datei)</li>
+                            <li>Wähle die Gültigkeitsdauer</li>
+                            <li>Klicke auf <strong>"Dateien teilen"</strong></li>
+                            <li>Verfolge den Upload-Fortschritt</li>
+                            <li>Kopiere Code oder Direktlink</li>
+                        </ol>
+                    </div>
+
+                    <div class="usage-step">
+                        <h4>3️⃣ Inhalte abrufen</h4>
+                        <ol>
+                            <li>Wechsle zum <strong>"Abrufen"</strong> Tab</li>
+                            <li>Gib den 4-stelligen Code ein</li>
+                            <li>Klicke auf <strong>"Abrufen"</strong></li>
+                            <li>Bei Texten: Kopiere mit oder ohne Formatierung</li>
+                            <li>Bei Dateien: Lade herunter oder schaue Vorschau</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="help-section">
+                    <h3>📱 Mobile Nutzung (iPhone/Android)</h3>
+                    <div class="mobile-tips">
+                        <div class="tip-item">
+                            <span class="tip-icon">📷</span>
+                            <div>
+                                <h4>Kamera-Upload</h4>
+                                <p>Klicke "Dateien auswählen" → Wähle "Kamera" → Mache Foto → Wird automatisch hinzugefügt</p>
+                            </div>
+                        </div>
+                        <div class="tip-item">
+                            <span class="tip-icon">👆</span>
+                            <div>
+                                <h4>Touch-Optimiert</h4>
+                                <p>Alle Buttons sind mindestens 44px groß für einfache Bedienung</p>
+                            </div>
+                        </div>
+                        <div class="tip-item">
+                            <span class="tip-icon">🔄</span>
+                            <div>
+                                <h4>Responsive Design</h4>
+                                <p>Passt sich automatisch an alle Bildschirmgrößen an</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="help-section">
+                    <h3>🔧 Erweiterte Features</h3>
+                    <div class="advanced-features">
+                        <div class="feature-item">
+                            <h4>📋 Formatierung beibehalten</h4>
+                            <p>Beim Kopieren von Code wird die Farbformatierung mit übertragen</p>
+                        </div>
+                        <div class="feature-item">
+                            <h4>⏰ Countdown-Timer</h4>
+                            <p>Sieh live, wie lange der Code noch gültig ist</p>
+                        </div>
+                        <div class="feature-item">
+                            <h4>📊 Server-Status</h4>
+                            <p>Live-Anzeige der verfügbaren Slots und Server-Kapazität</p>
+                        </div>
+                        <div class="feature-item">
+                            <h4>🔗 Direktlinks</h4>
+                            <p>Automatisch generierte Links für einfache Weitergabe</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="help-section">
+                    <h3>⚠️ Wichtige Hinweise</h3>
+                    <div class="warnings">
+                        <div class="warning-item">
+                            <span class="warning-icon">⏰</span>
+                            <p><strong>Zeitlimit:</strong> Alle Inhalte werden automatisch nach Ablauf gelöscht</p>
+                        </div>
+                        <div class="warning-item">
+                            <span class="warning-icon">🔒</span>
+                            <p><strong>Sicherheit:</strong> Teile Codes nur mit vertrauenswürdigen Personen</p>
+                        </div>
+                        <div class="warning-item">
+                            <span class="warning-icon">💾</span>
+                            <p><strong>Backup:</strong> Wichtige Inhalte sollten zusätzlich gespeichert werden</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> 

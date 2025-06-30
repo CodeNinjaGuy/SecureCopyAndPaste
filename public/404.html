@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Seite nicht gefunden | SharePaste</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .error-container {
+            text-align: center;
+            padding: 4rem 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .error-icon {
+            font-size: 6rem;
+            margin-bottom: 2rem;
+        }
+        
+        .error-title {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+        
+        .error-message {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+        }
+        
+        .error-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="error-container">
+            <div class="error-icon">🔍</div>
+            <h1 class="error-title">404</h1>
+            <p class="error-message">Die angeforderte Seite wurde nicht gefunden.</p>
+            <div class="error-actions">
+                <a href="/" class="btn btn-primary">
+                    <span class="btn-icon">🏠</span>
+                    Zur Startseite
+                </a>
+                <button onclick="history.back()" class="btn btn-outline">
+                    <span class="btn-icon">⬅️</span>
+                    Zurück
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
