@@ -37,7 +37,7 @@ Eine moderne und sichere Copy & Paste Webseite mit Code-Generierung für die ein
 1. **Repository klonen oder Dateien herunterladen**
    ```bash
    git clone <repository-url>
-   cd sharepaste
+   cd SecureCopyAndPaste
    ```
 
 2. **Abhängigkeiten installieren**
