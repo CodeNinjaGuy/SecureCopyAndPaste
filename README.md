@@ -64,7 +64,7 @@ Eine moderne und sichere Copy & Paste Webseite mit Code-Generierung für die ein
 
 4. **Browser öffnen**
    - Entwicklung: `http://localhost:8080`
-   - Produktion: `https://idefix.cbubble.com`
+  
 
 ## 🔧 Umgebungsvariablen
 
