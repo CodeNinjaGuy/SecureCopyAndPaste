@@ -414,29 +414,26 @@ app.post('/api/upload-multiple', upload.array('files', 10), (req, res) => {
 app.use('/uploads', express.static(uploadPath));
 
 // QR-Code Generierung API
-app.get('/api/qr/:text', async (req, res) => {
+app.get('/api/qr', async (req, res) => {
     try {
-        const { text } = req.params;
-        
+        const text = req.query.text;
         if (!text) {
             return res.status(400).json({ error: 'Text ist erforderlich' });
         }
-        
         // QR-Code als PNG generieren
         const qrCodeBuffer = await QRCode.toBuffer(text, {
             type: 'image/png',
             width: 200,
             margin: 2,
             color: {
-                dark: '#000000',
-                light: '#FFFFFF'
+                dark: '#111111',      // fast schwarz
+                light: '#e5e7eb'      // hellgrau (Tailwind: gray-200)
             }
         });
-        
+        res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader('Content-Type', 'image/png');
         res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 Stunde Cache
         res.send(qrCodeBuffer);
-        
     } catch (error) {
         console.error('Fehler bei QR-Code-Generierung:', error);
         res.status(500).json({ error: 'Fehler bei QR-Code-Generierung' });
