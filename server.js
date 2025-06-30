@@ -8,15 +8,38 @@ const fs = require('fs');
 const https = require('https');
 const { v4: uuidv4 } = require('uuid');
 const multer = require('multer');
+const QRCode = require('qrcode');
 
 const app = express();
-const PORT = process.env.PORT || 443;
 
-// SSL-Zertifikate laden
-const options = {
-    cert: fs.readFileSync('/etc/letsencrypt/live/idefix.cbubble.com/fullchain.pem'),
-    key: fs.readFileSync('/etc/letsencrypt/live/idefix.cbubble.com/privkey.pem')
-};
+// Umgebungsvariablen für Entwicklungs- und Produktionsmodus
+const isDevelopment = process.env.NODE_ENV !== 'production';
+const PORT = isDevelopment ? (process.env.PORT || 8080) : (process.env.PORT || 443);
+
+console.log(`🚀 Server-Modus: ${isDevelopment ? 'Entwicklung' : 'Produktion'}`);
+console.log(`🌐 Port: ${PORT}`);
+
+// SSL-Zertifikate nur im Produktionsmodus laden
+let server;
+if (isDevelopment) {
+    // Entwicklungsmodus: HTTP Server ohne SSL
+    server = app;
+    console.log('🔧 Entwicklungsmodus: HTTP Server ohne SSL');
+} else {
+    // Produktionsmodus: HTTPS Server mit SSL-Zertifikaten
+    try {
+        const options = {
+            cert: fs.readFileSync('/etc/letsencrypt/live/idefix.cbubble.com/fullchain.pem'),
+            key: fs.readFileSync('/etc/letsencrypt/live/idefix.cbubble.com/privkey.pem')
+        };
+        server = https.createServer(options, app);
+        console.log('🔒 Produktionsmodus: HTTPS Server mit SSL-Zertifikaten');
+    } catch (error) {
+        console.error('❌ Fehler beim Laden der SSL-Zertifikate:', error.message);
+        console.log('🔄 Fallback auf HTTP Server...');
+        server = app;
+    }
+}
 
 // Middleware
 app.use(helmet());
@@ -390,6 +413,36 @@ app.post('/api/upload-multiple', upload.array('files', 10), (req, res) => {
 // Statische Bereitstellung der Uploads
 app.use('/uploads', express.static(uploadPath));
 
+// QR-Code Generierung API
+app.get('/api/qr/:text', async (req, res) => {
+    try {
+        const { text } = req.params;
+        
+        if (!text) {
+            return res.status(400).json({ error: 'Text ist erforderlich' });
+        }
+        
+        // QR-Code als PNG generieren
+        const qrCodeBuffer = await QRCode.toBuffer(text, {
+            type: 'image/png',
+            width: 200,
+            margin: 2,
+            color: {
+                dark: '#000000',
+                light: '#FFFFFF'
+            }
+        });
+        
+        res.setHeader('Content-Type', 'image/png');
+        res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 Stunde Cache
+        res.send(qrCodeBuffer);
+        
+    } catch (error) {
+        console.error('Fehler bei QR-Code-Generierung:', error);
+        res.status(500).json({ error: 'Fehler bei QR-Code-Generierung' });
+    }
+});
+
 // Serve the main page
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -471,13 +524,15 @@ setInterval(() => {
     }
 }, 60 * 1000); // alle 60 Sekunden prüfen
 
-// HTTPS Server erstellen und starten
-const server = https.createServer(options, app);
-
+// Server starten
 server.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 HTTPS Server läuft auf https://0.0.0.0:${PORT}`);
+    const protocol = isDevelopment ? 'HTTP' : 'HTTPS';
+    const url = isDevelopment ? `http://localhost:${PORT}` : `https://0.0.0.0:${PORT}`;
+    console.log(`🚀 ${protocol} Server läuft auf ${url}`);
     console.log(`📊 Maximal ${MAX_ENTRIES} Einträge werden im Speicher gehalten`);
-    console.log(`🔒 SSL-Zertifikate von idefix.cbubble.com geladen`);
+    if (!isDevelopment) {
+        console.log(`🔒 SSL-Zertifikate von idefix.cbubble.com geladen`);
+    }
 });
 
 // Globale Fehlerbehandlung

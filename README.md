@@ -5,9 +5,11 @@ Eine moderne und sichere Copy & Paste Webseite mit Code-Generierung für die ein
 ## 🚀 Features
 
 - **Sichere Text- und Code-Freigabe** - Teilen Sie Inhalte über 4-stellige Codes
+- **QR-Code-Generierung** - Automatische QR-Codes für einfachen mobilen Zugriff
 - **Unterstützung für verschiedene Inhaltstypen** - Text, Code, HTML, Markdown
 - **Rich Text Editor** - Formatierungstools für Text (Fett, Kursiv, Unterstreichung, Code)
 - **Bildunterstützung** - Einfügen von Bildern per Drag & Drop oder Copy & Paste
+- **Datei-Upload** - Sichere Freigabe von Dateien (Bilder, PDFs, Dokumente)
 - **Responsive Design** - Optimiert für Desktop, Tablet und Mobile
 - **Automatische Bereinigung** - Maximal 100 Einträge im Speicher
 - **Keine dauerhafte Speicherung** - Alle Daten werden nur temporär gespeichert
@@ -21,6 +23,7 @@ Eine moderne und sichere Copy & Paste Webseite mit Code-Generierung für die ein
 - **Styling**: Moderne CSS mit CSS Custom Properties
 - **Sicherheit**: Helmet.js, CORS, Rate Limiting
 - **Performance**: Compression, optimierte Assets
+- **QR-Codes**: QRCode.js für dynamische QR-Code-Generierung
 
 ## 📦 Installation
 
@@ -43,18 +46,32 @@ Eine moderne und sichere Copy & Paste Webseite mit Code-Generierung für die ein
    ```
 
 3. **Server starten**
+
+   **Entwicklungsmodus (HTTP auf Port 8080):**
    ```bash
-   # Produktionsmodus
-   npm start
-   
-   # Entwicklungsmodus (mit Auto-Reload)
    npm run dev
+   ```
+   
+   **Produktionsmodus (HTTPS auf Port 443):**
+   ```bash
+   npm start
+   ```
+   
+   **Windows Entwicklungsmodus:**
+   ```bash
+   npm run dev:windows
    ```
 
 4. **Browser öffnen**
-   ```
-   http://localhost:3000
-   ```
+   - Entwicklung: `http://localhost:8080`
+   - Produktion: `https://idefix.cbubble.com`
+
+## 🔧 Umgebungsvariablen
+
+- `NODE_ENV`: Bestimmt den Server-Modus
+  - `development`: HTTP Server auf Port 8080 (Standard)
+  - `production`: HTTPS Server auf Port 443 mit SSL-Zertifikaten
+- `PORT`: Überschreibt den Standard-Port (optional)
 
 ## 🎯 Verwendung
 
@@ -65,8 +82,16 @@ Eine moderne und sichere Copy & Paste Webseite mit Code-Generierung für die ein
 3. Fügen Sie Ihren Text oder Code in das Eingabefeld ein
 4. Wählen Sie den entsprechenden Inhaltstyp
 5. Klicken Sie auf "Teilen"
-6. Kopieren Sie den generierten 4-stelligen Code
+6. Kopieren Sie den generierten 4-stelligen Code oder scannen Sie den QR-Code
 7. Teilen Sie den Code mit dem Empfänger
+
+### Dateien teilen
+
+1. Wechseln Sie zum "Upload" Tab
+2. Ziehen Sie Dateien in die Upload-Zone oder wählen Sie sie aus
+3. Wählen Sie die Gültigkeitsdauer
+4. Klicken Sie auf "Dateien teilen"
+5. Kopieren Sie den Code oder scannen Sie den QR-Code
 
 ### Inhalte abrufen
 
@@ -74,6 +99,12 @@ Eine moderne und sichere Copy & Paste Webseite mit Code-Generierung für die ein
 2. Geben Sie den 4-stelligen Code ein
 3. Klicken Sie auf "Abrufen"
 4. Der Inhalt wird angezeigt und kann kopiert werden
+
+### QR-Codes
+
+- **Automatische Generierung**: QR-Codes werden automatisch beim Teilen erstellt
+- **Download**: QR-Codes können als PNG-Datei heruntergeladen werden
+- **Mobile Nutzung**: QR-Codes können mit dem Smartphone gescannt werden
 
 ### Keyboard Shortcuts
 
